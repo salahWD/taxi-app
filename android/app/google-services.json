@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "839397582174",
+    "project_id": "tactaxi-38422",
+    "storage_bucket": "tactaxi-38422.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:839397582174:android:40ad14c6053ca4f3a71bcf",
+        "android_client_info": {
+          "package_name": "com.tactaxi.nl"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-Z7E9AyuMTWUFruXP-48t2tpcsCpBE44"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
