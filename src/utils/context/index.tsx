@@ -24,6 +24,8 @@ const initialContextVal = {
     setDocumentDetail: () => { },
     vehicleDetail: '',
     setVehicleDetail: () => { },
+    hasRedirected: false,
+    setHasRedirected: () => { },
 }
 
 export const AppContext = createContext<ContextType>(initialContextVal);
@@ -37,6 +39,7 @@ export const AppContextProvider = (props: any) => {
     const [accountDetail, setAccountDetail] = useState('');
     const [documentDetail, setDocumentDetail] = useState('');
     const [vehicleDetail, setVehicleDetail] = useState('');
+    const [hasRedirected, setHasRedirected] = useState(false);
 
     useEffect(() => {
         const fetchToken = async () => {
@@ -162,6 +165,8 @@ export const AppContextProvider = (props: any) => {
         setDocumentDetail,
         vehicleDetail,
         setVehicleDetail,
+        hasRedirected,
+        setHasRedirected,
     };
 
     return (

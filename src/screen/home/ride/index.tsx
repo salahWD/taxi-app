@@ -15,6 +15,7 @@ import {
   BackButton,
   notificationHelper,
 } from "../../../commonComponents";
+import { rideRequestDataGet } from "../../../api/store/action/rideRequestAction";
 import { UserDetails } from "./component/userDetails";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/main/types";
@@ -26,12 +27,16 @@ import {
   rideDataGet,
 } from "../../../api/store/action/index";
 import { useDispatch, useSelector } from "react-redux";
+import { selfDriverData } from "../../../api/store/action/index";
+
 
 type navigation = NativeStackNavigationProp<RootStackParamList>;
 
 export function Ride() {
+
+  const { selfDriver } = useSelector((state: any) => state.account);
   const navigation = useNavigation<navigation>();
-  const { currSymbol, currValue, textRtlStyle, viewRtlStyle, isDark } =
+  const { currSymbol, currValue, textRtlStyle, viewRtlStyle, isDark, hasRedirected, setHasRedirected } =
     useValues();
   const { colors } = useTheme();
   const [bidId, setBidID] = useState<number | null>(null);
@@ -42,6 +47,11 @@ export function Ride() {
   const { bidGet } = useSelector((state) => state.bid);
   const { translateData } = useSelector((state) => state.setting);
 
+  const redirectToRide = () => {
+    setHasRedirected(true);
+    navigation.navigate("MyRide");
+  };
+
   const gotoAcceptFare = async () => {
     let payload: DriverRideRequest = {
       amount: value,
@@ -51,6 +61,7 @@ export function Ride() {
     dispatch(bidDataPost(payload))
       .unwrap()
       .then((res: any) => {
+        console.log("first bid id", res);
         setBidID(res.id);
       });
   };
@@ -73,22 +84,32 @@ export function Ride() {
     }, [bidId, dispatch])
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(selfDriverData());
+    }, [])
+  );
+
   useEffect(() => {
     if (bidGet) {
+      console.log("bidGet", bidGet)
       if (
         bidGet.status === "accepted" &&
         ride?.service_category?.slug != "schedule"
       ) {
+        console.log("bid accepted ", bidGet.status, ride?.service_category?.slug)
         const rideID = bidGet.ride_id;
         navigation.navigate("AcceptFare", { ride_Id: rideID });
         dispatch(rideDataGet(rideID));
       } else if (bidGet.status === "rejected") {
+        console.log("bid rejected ", bidGet.status);
         navigation.goBack();
         notificationHelper("Bid", "Bid Rejected", "error");
       } else if (
         ride?.service_category?.slug == "schedule" &&
         bidGet.status === "accepted"
       ) {
+        console.log("scheduled bid accepted ", bidGet.status, ride?.service_category?.slug);
         navigation.goBack();
         notificationHelper("Ride Status", "Ride Scheduled", "success");
       }
@@ -104,90 +125,93 @@ export function Ride() {
       setValue(value - 10);
     }
   };
-
+  
   const buttonColor =
     value >= ride.ride_fare ? appColors.primary : appColors.disabled;
 
   return (
-    <View style={commanStyles.main}>
-      <View style={styles.mapSection}>
-        <Map />
-      </View>
-      <View style={styles.extraSection}></View>
-      <View style={[styles.backButton]}>
-        <BackButton />
-      </View>
-      <View style={styles.greenSection}>
-        <UserDetails RideData={ride} />
-        <View style={[styles.bottomView, { backgroundColor: colors.card }]}>
-          <Text
-            style={[
-              styles.text,
-              { color: colors.text, textAlign: textRtlStyle },
-            ]}
-          >
-            {translateData.offerYourFare}
-          </Text>
-          <View
-            style={[
-              styles.boxContainer,
-              {
-                backgroundColor: colors.background,
-                flexDirection: viewRtlStyle,
-              },
-            ]}
-          >
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={handleDecrement}
+    <>
+      <View style={commanStyles.main}>
+        <View style={styles.mapSection}>
+          <Map userLocation={ride.location_coordinates} />
+        </View>
+        <View style={styles.extraSection}></View>
+        <View style={[styles.backButton]}>
+          <BackButton />
+        </View>
+        <View style={styles.greenSection}>
+          <UserDetails RideData={ride} />
+          <View style={[styles.bottomView, { backgroundColor: colors.card }]}>
+            <Text
               style={[
-                styles.boxLeft,
+                styles.text,
+                { color: colors.text, textAlign: textRtlStyle },
+              ]}
+            >
+              {translateData.offerYourFare}
+            </Text>
+            <View
+              style={[
+                styles.boxContainer,
                 {
-                  backgroundColor:
-                    value <= ride.ride_fare ? colors.card : colors.card,
+                  backgroundColor: colors.background,
+                  flexDirection: viewRtlStyle,
                 },
               ]}
-              disabled={value <= ride.ride_fare}
             >
-              <Text
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={handleDecrement}
                 style={[
-                  styles.value,
-                  { color: isDark ? appColors.white : appColors.primaryFont },
+                  styles.boxLeft,
+                  {
+                    backgroundColor:
+                      value <= ride.ride_fare ? colors.card : colors.card,
+                  },
                 ]}
+                disabled={value <= ride.ride_fare}
               >
-                -10
+                <Text
+                  style={[
+                    styles.value,
+                    { color: isDark ? appColors.white : appColors.primaryFont },
+                  ]}
+                >
+                  -10
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.textCenter}>
+                {currSymbol}
+                {currValue * value}
               </Text>
-            </TouchableOpacity>
-            <Text style={styles.textCenter}>
-              {currSymbol}
-              {currValue * value}
-            </Text>
-            <TouchableOpacity
-              onPress={handleIncrement}
-              style={[styles.boxRight, { backgroundColor: colors.card }]}
-            >
-              <Text
-                style={[
-                  styles.value,
-                  { color: isDark ? appColors.white : appColors.primaryFont },
-                ]}
+              <TouchableOpacity
+                onPress={handleIncrement}
+                style={[styles.boxRight, { backgroundColor: colors.card }]}
               >
-                +10
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.button}>
-            <Button
-              onPress={gotoAcceptFare}
-              title={`${translateData.acceptFareon}${currSymbol}${
-                currValue * value
-              }`}
-              backgroundColor={buttonColor}
-              color={appColors.white}
-            />
+                <Text
+                  style={[
+                    styles.value,
+                    { color: isDark ? appColors.white : appColors.primaryFont },
+                  ]}
+                >
+                  +10
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.button}>
+              <Button
+                onPress={gotoAcceptFare}
+                title={`${translateData.acceptFareon}${currSymbol} ${
+                  currValue * value
+                }`}
+                backgroundColor={buttonColor}
+                color={appColors.white}
+              />
+            </View>
           </View>
         </View>
       </View>
-    </View>
+      {selfDriver?.total_active_rides > 0 && !hasRedirected && redirectToRide()}
+    </>
   );
 }

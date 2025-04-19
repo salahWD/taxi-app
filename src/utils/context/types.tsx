@@ -20,4 +20,6 @@ export interface ContextType {
     setDocumentDetail: any,
     vehicleDetail: any,
     setVehicleDetail: any,
+    hasRedirected: any,
+    setHasRedirected: any,
 }

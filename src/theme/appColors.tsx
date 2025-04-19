@@ -63,7 +63,7 @@ const appColors: AppColors = {
   white: "#fff",
   black: "#000",
   darkText: "#BCBCBC",
-  primary: "#eb750d",
+  primary: "#199675",
   darkFillBar: "#303E3A",
   dotPrimary: "#2F4841",
   lightYellow: "#FFF7E5",
