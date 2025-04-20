@@ -47,7 +47,7 @@ export function Home() {
   const navigation = useNavigation<navigation>();
   const [isOn, setIsOn] = useState(false);
   const { colors } = useTheme();
-  const { textRtlStyle, setToken, viewRtlStyle, isDark, currSymbol } =
+  const { textRtlStyle, setToken, viewRtlStyle, isDark, currSymbol, hasRedirected, setHasRedirected } =
     useValues();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const isFocused = useIsFocused();
@@ -61,6 +61,11 @@ export function Home() {
   const [offlineLng, setOfflineLng] = useState();
   const { selfDriver } = useSelector((state: any) => state.account);
   const { translateData } = useSelector((state) => state.setting);
+
+  const redirectToRide = () => {
+    setHasRedirected(true);
+    navigate("MyRide");
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -169,7 +174,6 @@ export function Home() {
       navigate("RentalDetails", { ride });
     } else {
       console.log(`going to ride with id: ${ride.id}`);
-      console.log(ride);
       navigation.navigate("Ride", { ride });
     }
   };
@@ -292,6 +296,9 @@ export function Home() {
   };
 
   useEffect(() => {
+    if (selfDriver?.total_active_rides <= 0 && !hasRedirected) {
+      setHasRedirected(false);
+    }
     return () => {
       if (watchId?.current) {
         Geolocation.clearWatch(watchId.current);
@@ -428,6 +435,7 @@ export function Home() {
           <SwipeButton buttonText={translateData.backTOActive} />
         </View>
       )}
+      {selfDriver?.total_active_rides > 0 && !hasRedirected && redirectToRide()}
     </>
   );
 }
