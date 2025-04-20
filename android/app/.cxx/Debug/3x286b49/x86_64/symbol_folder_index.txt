@@ -1,1 +1,0 @@
-F:\test\android\app\build\intermediates\cxx\Debug\3x286b49\obj\x86_64
