@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { bidDataGet /* , bidUpdate */ } from "../action/bidAction";
+import { bidDataGet , bidUpdate } from "../action/bidAction";
 import { BidInterface } from "../../interface/bidInterface";
 
 const initialState: BidInterface = {
@@ -29,16 +29,16 @@ const bidSlice = createSlice({
     });
 
     //Update bid
-    // builder.addCase(bidUpdate.pending, (state, action) => {
-    //   state.loading = true;
-    // });
-    // builder.addCase(bidUpdate.fulfilled, (state, action) => {
-    //   state.bidUpdateData = action.payload;
-    //   state.loading = false;
-    // });
-    // builder.addCase(bidUpdate.rejected, (state, action) => {
-    //   state.loading = false;
-    // });
+    builder.addCase(bidUpdate.pending, (state, action) => {
+      state.loading = true;
+    });
+    builder.addCase(bidUpdate.fulfilled, (state, action) => {
+      state.bidUpdateData = action.payload;
+      state.loading = false;
+    });
+    builder.addCase(bidUpdate.rejected, (state, action) => {
+      state.loading = false;
+    });
   },
 });
 export default bidSlice.reducer;

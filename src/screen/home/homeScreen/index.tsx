@@ -60,18 +60,27 @@ export function Home() {
   const [offlineLat, setOfflineLat] = useState();
   const [offlineLng, setOfflineLng] = useState();
   const { selfDriver } = useSelector((state: any) => state.account);
+  const [activeRiders, setActiveRiders] = useState(selfDriver?.total_active_rides);
   const { translateData } = useSelector((state) => state.setting);
 
   const redirectToRide = () => {
     setHasRedirected(true);
     navigate("MyRide");
   };
-
-  useFocusEffect(
-    useCallback(() => {
+  
+  useEffect(() => {
+    const intervalId = setInterval(() => {
       dispatch(selfDriverData());
-    }, [])
-  );
+      if (selfDriver?.total_active_rides > activeRiders) {
+        setHasRedirected(false);
+      }
+      setActiveRiders(selfDriver?.total_active_rides);
+    }, 5000);
+    
+    return () => clearInterval(intervalId);
+  }, [selfDriver, dispatch]);
+
+  
   const rideData = [
     {
       id: "1",

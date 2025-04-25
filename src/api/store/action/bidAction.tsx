@@ -13,10 +13,10 @@ export const bidDataGet = createAsyncThunk(BIDGET, async (bid_id: number) => {
   return response?.data;
 });
 
-// export const bidUpdate = createAsyncThunk(
-//   BIDUPDATE,
-//   async (data: BidInterface) => {
-//     const response = await bidServices.bidUpdate(data);
-//     return response?.data;
-//   },
-// );
+export const bidUpdate = createAsyncThunk(
+  BIDUPDATE,
+  async (data: BidInterface) => {
+    const response = await bidServices.bidUpdate(data);
+    return response?.data;
+  },
+);

@@ -43,6 +43,7 @@ export function AcceptFare() {
 
   return (
     <View style={styles.container}>
+        {/* <Map userLocation={rideData.location_coordinates} /> */}
       <View style={styles.mapSection}>
         <Map />
       </View>

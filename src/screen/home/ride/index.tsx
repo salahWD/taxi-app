@@ -15,7 +15,6 @@ import {
   BackButton,
   notificationHelper,
 } from "../../../commonComponents";
-import { rideRequestDataGet } from "../../../api/store/action/rideRequestAction";
 import { UserDetails } from "./component/userDetails";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/main/types";
@@ -35,6 +34,7 @@ type navigation = NativeStackNavigationProp<RootStackParamList>;
 export function Ride() {
 
   const { selfDriver } = useSelector((state: any) => state.account);
+  const [activeRiders, setActiveRiders] = useState(selfDriver?.total_active_rides);
   const navigation = useNavigation<navigation>();
   const { currSymbol, currValue, textRtlStyle, viewRtlStyle, isDark, hasRedirected, setHasRedirected } =
     useValues();
@@ -51,6 +51,26 @@ export function Ride() {
     setHasRedirected(true);
     navigation.navigate("MyRide");
   };
+  
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      dispatch(selfDriverData());
+      if (selfDriver?.total_active_rides > activeRiders) {
+        setHasRedirected(false);
+      }
+      setActiveRiders(selfDriver?.total_active_rides || 0);
+    }, 5000);
+    
+    return () => clearInterval(intervalId);
+  }, [selfDriver, dispatch]);
+
+
+  useEffect(() => {
+    if (selfDriver?.total_active_rides <= 0 && !hasRedirected) {
+      setHasRedirected(false);
+    }
+  }, []);
+
 
   const gotoAcceptFare = async () => {
     let payload: DriverRideRequest = {
@@ -61,34 +81,30 @@ export function Ride() {
     dispatch(bidDataPost(payload))
       .unwrap()
       .then((res: any) => {
-        console.log("first bid id", res);
-        setBidID(res.id);
+        if (res?.id) {
+          setBidID(res.id);
+        }else {
+          console.log("Error in bidDataPost response:", res);
+        }
       });
   };
-
-  useFocusEffect(
-    useCallback(() => {
-      let intervalId: NodeJS.Timeout | undefined;
-
-      if (bidId) {
-        intervalId = setInterval(() => {
-          dispatch(bidDataGet(bidId));
-        }, 5000);
-      }
-
-      return () => {
-        if (intervalId) {
-          clearInterval(intervalId);
-        }
-      };
-    }, [bidId, dispatch])
-  );
 
   useFocusEffect(
     useCallback(() => {
       dispatch(selfDriverData());
     }, [])
   );
+
+  // useEffect(() => {
+  //   if (bidGet.status === "accepted") {
+  //     console.log("Bid accepted, redirecting to My Rides screen");
+  //     redirectToRide();
+  //   } else {
+  //     console.log("Bid data:", bidGet);
+  //     console.log("Bid status:", bidGet?.status);
+  //     console.log("ride:", ride);
+  //   }
+  // }, [bidGet]);
 
   useEffect(() => {
     if (bidGet) {
