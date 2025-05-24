@@ -15,7 +15,8 @@ import Calander from "../../../../assets/icons/caladerSmall";
 type navigation = NativeStackNavigationProp<RootStackParamList>;
 
 export function Details({ rideDetails, vehicleDetail }) {
-  const { viewRtlStyle, isDark, textRtlStyle, currSymbol, currValue } = useValues();
+  const { viewRtlStyle, isDark, textRtlStyle, currSymbol, currValue } =
+    useValues();
   const { colors } = useTheme();
   const navigation = useNavigation<navigation>();
 
@@ -66,16 +67,14 @@ export function Details({ rideDetails, vehicleDetail }) {
               style={styles.carImage}
             />
             <View style={styles.tripTextContainer}>
-
               <Text style={[styles.idNo, { color: colors.text }]}>
                 #{rideDetails?.ride_number}
               </Text>
               <Text style={[styles.tripCostText, { textAlign: textRtlStyle }]}>
-                {currSymbol}{currValue * rideDetails.total}
-
+                {currSymbol}
+                {currValue * rideDetails.total}
               </Text>
             </View>
-
           </View>
 
           <View style={styles.iconView}>

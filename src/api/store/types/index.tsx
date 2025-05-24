@@ -21,6 +21,7 @@ export const RIDEGETS = "RIDEGETS";
 export const RIDESTART = "RIDESTART";
 export const REVIEW = "REVIEW";
 export const RIDECOMPLETE = "RIDECOMPLETE";
+export const RIDEEND = "RIDEEND";
 export const WALLET = "WALLET";
 export const ALL_VEHICLE = "ALL_VEHICLE";
 export const DELETE_ACCOUNT = "DELETE_ACCOUNT";

@@ -17,7 +17,8 @@ interface UpcomingRideProps {
 }
 
 export function UpcomingRide({ ride, gotoRide }: UpcomingRideProps) {
-  const { textRtlStyle, viewRtlStyle, isDark, rtl, currSymbol, currValue } = useValues();
+  const { textRtlStyle, viewRtlStyle, isDark, rtl, currSymbol, currValue } =
+    useValues();
   const { colors } = useTheme();
   const { translateData } = useSelector((state) => state.setting);
   const [rating, setRating] = useState();
@@ -69,7 +70,7 @@ export function UpcomingRide({ ride, gotoRide }: UpcomingRideProps) {
     };
   };
 
-  const formattedDate = formatDates(ride.created_at);
+  const formattedDate = formatDates(ride?.start_time ?? ride.created_at);
 
   return (
     <TouchableOpacity
@@ -147,7 +148,10 @@ export function UpcomingRide({ ride, gotoRide }: UpcomingRideProps) {
             </View>
           </View>
           <View style={styles.rate}>
-            <Text style={styles.price}>{currSymbol}{currValue * ride.ride_fare}</Text>
+            <Text style={styles.price}>
+              {currSymbol}
+              {currValue * ride.ride_fare}
+            </Text>
           </View>
         </View>
         <View style={[styles.border, { borderColor: colors.border }]} />

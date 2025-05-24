@@ -13,7 +13,7 @@ export function MyRide() {
       <View>
         <View
           style={{
-            backgroundColor:appColors.graybackground,
+            backgroundColor: appColors.graybackground,
           }}
         >
           <RideStatus />

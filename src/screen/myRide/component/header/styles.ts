@@ -15,6 +15,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backButton: {
+    zIndex: 99,
     height: windowHeight(5),
     width: windowWidth(10),
     justifyContent: 'center',

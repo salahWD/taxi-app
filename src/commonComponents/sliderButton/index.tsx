@@ -4,6 +4,7 @@ import { windowHeight, windowWidth, fontSizes } from "../../theme/appConstant";
 import appColors from "../../theme/appColors";
 import appFonts from "../../theme/appFonts";
 import { useNavigation } from "@react-navigation/native";
+import FastImage from "react-native-fast-image";
 import Gifs from "../../utils/gifs/gifs";
 
 const BUTTON_WIDTH = windowWidth(110) * 0.85;
@@ -102,7 +103,12 @@ const SwipeButton = ({ buttonText }) => {
           style={[styles.slider, { transform: [{ translateX }] }]}
           {...panResponder.panHandlers}
         >
-          <Image source={Gifs.ActiveRideGo} style={styles.activeRideGo} />
+          {/* <Image source={Gifs.ActiveRideGo} style={styles.activeRideGo} /> */}
+          <FastImage
+            style={styles.activeRideGo}
+            source={Gifs.ActiveRideGo}
+            resizeMode={FastImage.resizeMode.contain}
+          />
         </Animated.View>
       </View>
     </View>

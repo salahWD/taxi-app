@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import React, { useState, useEffect, useCallback } from "react";
 import appColors from "../../../theme/appColors";
 import {
@@ -26,18 +26,29 @@ import {
   rideDataGet,
 } from "../../../api/store/action/index";
 import { useDispatch, useSelector } from "react-redux";
-import { selfDriverData } from "../../../api/store/action/index";
 
+import { selfDriverData } from "../../../api/store/action/index";
+import { vehicleData } from "../../../api/store/action";
 
 type navigation = NativeStackNavigationProp<RootStackParamList>;
 
 export function Ride() {
-
   const { selfDriver } = useSelector((state: any) => state.account);
-  const [activeRiders, setActiveRiders] = useState(selfDriver?.total_active_rides);
+  const [activeRiders, setActiveRiders] = useState(
+    selfDriver?.total_active_rides
+  );
   const navigation = useNavigation<navigation>();
-  const { currSymbol, currValue, textRtlStyle, viewRtlStyle, isDark, hasRedirected, setHasRedirected } =
-    useValues();
+  const {
+    currSymbol,
+    currValue,
+    textRtlStyle,
+    viewRtlStyle,
+    isDark,
+    hasRedirected,
+    setHasRedirected,
+    homeScreenRedirectTrig,
+    setHomeScreenRedirectTrig,
+  } = useValues();
   const { colors } = useTheme();
   const [bidId, setBidID] = useState<number | null>(null);
   const route = useRoute();
@@ -47,30 +58,54 @@ export function Ride() {
   const { bidGet } = useSelector((state) => state.bid);
   const { translateData } = useSelector((state) => state.setting);
 
+  const { allVehicle } = useSelector((state) => state.vehicleType);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(vehicleData());
+      return () => {};
+    }, [dispatch])
+  );
+
+  const vehicle_type_id = selfDriver?.vehicle_info?.vehicle_type_id;
+  const vehicleInfo = allVehicle?.find(
+    (vehicle) => vehicle?.id === vehicle_type_id
+  );
+
+  useEffect(() => {
+    setHomeScreenRedirectTrig(false);
+  }, []);
+
   const redirectToRide = () => {
-    setHasRedirected(true);
-    navigation.navigate("MyRide");
+    // console.log("==============");
+    // console.log(selfDriver?.last_active_ride?.id == ride.id);
+    // console.log("ride", ride);
+    // console.log("homeScreenRedirectTrig", homeScreenRedirectTrig);
+    // console.log("hasRedirected", hasRedirected);
+    // console.log("last active ride", selfDriver?.last_active_ride?.id);
+    // console.log("redirecting to ride 2");
+    const activeRideId = selfDriver?.last_active_ride?.id;
+    setHasRedirected(activeRideId);
+    navigation.navigate("PendingDetails", {
+      item: selfDriver?.last_active_ride,
+      vehicleDetail: vehicleInfo,
+    });
   };
-  
+
   useEffect(() => {
     const intervalId = setInterval(() => {
       dispatch(selfDriverData());
-      if (selfDriver?.total_active_rides > activeRiders) {
-        setHasRedirected(false);
+      if (
+        selfDriver?.total_active_rides == "0" &&
+        selfDriver?.total_pending_rides == "0"
+      ) {
+        setHasRedirected(-1);
       }
       setActiveRiders(selfDriver?.total_active_rides || 0);
     }, 5000);
-    
+
     return () => clearInterval(intervalId);
   }, [selfDriver, dispatch]);
-
-
-  useEffect(() => {
-    if (selfDriver?.total_active_rides <= 0 && !hasRedirected) {
-      setHasRedirected(false);
-    }
-  }, []);
-
 
   const gotoAcceptFare = async () => {
     let payload: DriverRideRequest = {
@@ -83,37 +118,32 @@ export function Ride() {
       .then((res: any) => {
         if (res?.id) {
           setBidID(res.id);
-        }else {
+          Alert.alert("Success", "The Fare Was Sent Successfully");
+        } else {
+          Alert.alert("Error", res.message);
           console.log("Error in bidDataPost response:", res);
         }
       });
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      dispatch(selfDriverData());
-    }, [])
-  );
-
-  // useEffect(() => {
-  //   if (bidGet.status === "accepted") {
-  //     console.log("Bid accepted, redirecting to My Rides screen");
-  //     redirectToRide();
-  //   } else {
-  //     console.log("Bid data:", bidGet);
-  //     console.log("Bid status:", bidGet?.status);
-  //     console.log("ride:", ride);
-  //   }
-  // }, [bidGet]);
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     dispatch(selfDriverData());
+  //   }, [])
+  // );
 
   useEffect(() => {
     if (bidGet) {
-      console.log("bidGet", bidGet)
+      console.log("bidGet", bidGet);
       if (
         bidGet.status === "accepted" &&
         ride?.service_category?.slug != "schedule"
       ) {
-        console.log("bid accepted ", bidGet.status, ride?.service_category?.slug)
+        console.log(
+          "bid accepted ",
+          bidGet.status,
+          ride?.service_category?.slug
+        );
         const rideID = bidGet.ride_id;
         navigation.navigate("AcceptFare", { ride_Id: rideID });
         dispatch(rideDataGet(rideID));
@@ -125,7 +155,11 @@ export function Ride() {
         ride?.service_category?.slug == "schedule" &&
         bidGet.status === "accepted"
       ) {
-        console.log("scheduled bid accepted ", bidGet.status, ride?.service_category?.slug);
+        console.log(
+          "scheduled bid accepted ",
+          bidGet.status,
+          ride?.service_category?.slug
+        );
         navigation.goBack();
         notificationHelper("Ride Status", "Ride Scheduled", "success");
       }
@@ -141,7 +175,7 @@ export function Ride() {
       setValue(value - 10);
     }
   };
-  
+
   const buttonColor =
     value >= ride.ride_fare ? appColors.primary : appColors.disabled;
 
@@ -227,7 +261,10 @@ export function Ride() {
           </View>
         </View>
       </View>
-      {selfDriver?.total_active_rides > 0 && !hasRedirected && redirectToRide()}
+      {typeof selfDriver?.last_active_ride?.id !== "undefined" &&
+        selfDriver?.last_active_ride?.id !== null &&
+        selfDriver?.last_active_ride?.id != hasRedirected &&
+        redirectToRide()}
     </>
   );
 }

@@ -1,7 +1,11 @@
-import { StyleSheet } from 'react-native';
-import { windowHeight, windowWidth, fontSizes } from '../../../theme/appConstant';
-import appFonts from '../../../theme/appFonts';
-import appColors from '../../../theme/appColors';
+import { StyleSheet } from "react-native";
+import {
+  windowHeight,
+  windowWidth,
+  fontSizes,
+} from "../../../theme/appConstant";
+import appFonts from "../../../theme/appFonts";
+import appColors from "../../../theme/appColors";
 
 const styles = StyleSheet.create({
   addressContainer: {
@@ -20,42 +24,42 @@ const styles = StyleSheet.create({
   },
   dashedLine: {
     height: 0.1,
-    width: '100%',
+    width: "100%",
     borderWidth: windowHeight(0.1),
     borderColor: appColors.border,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
     marginVertical: windowHeight(2),
   },
   iconStar: {
     marginHorizontal: windowWidth(3),
-    marginVertical: windowHeight(3)
+    marginVertical: windowHeight(3),
   },
   pickUpLocationStyles: {
     fontFamily: appFonts.regular,
     fontSize: fontSizes.FONT17,
     color: appColors.secondaryFont,
-    fontWeight: '400',
+    fontWeight: "400",
   },
   itemStyle: {
     fontFamily: appFonts.regular,
     fontSize: fontSizes.FONT17,
     color: appColors.secondaryFont,
-    fontWeight: '400',
+    fontWeight: "400",
   },
   container: {
     marginHorizontal: windowHeight(2),
     marginTop: windowHeight(2.3),
   },
   rideInfoContainer: {
-    width: '100%',
+    width: "100%",
     borderRadius: 6,
     paddingHorizontal: windowHeight(1.5),
     paddingTop: windowHeight(1.8),
     paddingVertical: windowHeight(1),
-    borderWidth: windowHeight(0.1)
+    borderWidth: windowHeight(0.1),
   },
   profileInfoContainer: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   profileImage: {
     width: windowWidth(12),
@@ -67,26 +71,26 @@ const styles = StyleSheet.create({
 
   profileTextContainer: {
     flexGrow: 0.95,
-    top: windowHeight(0.5)
+    top: windowHeight(0.5),
   },
   profileName: {
-    fontWeight: '400',
+    fontWeight: "400",
     fontFamily: appFonts.medium,
     fontSize: fontSizes.FONT17,
     color: appColors.primaryFont,
   },
   carInfoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: windowHeight(0.5),
   },
   carInfoText: {
     fontFamily: appFonts.regular,
     fontSize: fontSizes.FONT17,
     color: appColors.secondaryFont,
-    fontWeight: '400',
+    fontWeight: "400",
   },
   ratingText: {
-    fontWeight: '400',
+    fontWeight: "400",
     fontFamily: appFonts.medium,
     fontSize: fontSizes.FONT17,
     color: appColors.primaryFont,
@@ -94,20 +98,20 @@ const styles = StyleSheet.create({
   tripImage: {
     width: windowWidth(12),
     height: windowHeight(4),
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   tripTextContainer: {
     paddingHorizontal: windowHeight(1.4),
     flexGrow: 1,
   },
   tripIDText: {
-    fontWeight: '400',
+    fontWeight: "400",
     fontFamily: appFonts.medium,
     fontSize: fontSizes.FONT17,
     color: appColors.primaryFont,
   },
   tripCostText: {
-    fontWeight: '400',
+    fontWeight: "400",
     fontFamily: appFonts.medium,
     fontSize: fontSizes.FONT17,
     color: appColors.price,
@@ -117,21 +121,21 @@ const styles = StyleSheet.create({
     fontFamily: appFonts.regular,
     fontSize: fontSizes.FONT17,
     color: appColors.secondaryFont,
-    fontWeight: '400',
+    fontWeight: "400",
   },
   iconContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginHorizontal: windowHeight(14),
   },
   userImage: {
     width: windowWidth(11.6),
     height: windowWidth(12),
-    resizeMode: 'stretch',
+    resizeMode: "stretch",
   },
   listContainer: {
     flex: 1,
-    bottom: windowHeight(1.8)
+    bottom: windowHeight(1.8),
   },
   iconContainer1: {
     height: windowHeight(5.5),
@@ -161,7 +165,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: windowHeight(2),
   },
-  containerService: { marginTop: windowHeight(2), paddingHorizontal: windowHeight(0.5) },
+  containerService: {
+    marginTop: windowHeight(2),
+    paddingHorizontal: windowHeight(0.5),
+  },
   callContainer: {
     borderWidth: windowHeight(0.1),
     borderRadius: windowWidth(10),
@@ -171,18 +178,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   acceptedContainer: {
-    width: windowWidth(23),
-    justifyContent: "space-between"
+    // width: windowWidth(23),
+    width: windowWidth(11),
+    justifyContent: "space-between",
   },
   reviews_count: {
     color: appColors.secondaryFont,
     fontFamily: appFonts.regular,
   },
   rating_count: {
-    fontFamily: appFonts.regular
+    fontFamily: appFonts.regular,
   },
   ratingContainer: {
-    marginHorizontal: windowWidth(1)
+    marginHorizontal: windowWidth(1),
   },
   noDataContainer: {
     flex: 1,
@@ -203,7 +211,7 @@ const styles = StyleSheet.create({
   noDataDesc: {
     fontFamily: appFonts.regular,
     color: appColors.darkBorderBlack,
-    marginTop: windowHeight(1)
-  }
+    marginTop: windowHeight(1),
+  },
 });
 export { styles };

@@ -17,8 +17,6 @@ import {
   useTheme,
   useIsFocused,
 } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../../navigation/main/types";
 import { useValues } from "../../../utils/context";
 import appColors from "../../../theme/appColors";
 import { driverZone, selfDriverData } from "../../../api/store/action/index";
@@ -40,18 +38,25 @@ import {
 import commonStyles from "../../../style/commanStyles";
 import { useFocusEffect } from "@react-navigation/native";
 import SwipeButton from "../../../commonComponents/sliderButton";
-
-type navigation = NativeStackNavigationProp<RootStackParamList>;
+import { vehicleData } from "../../../api/store/action";
 
 export function Home() {
-  const navigation = useNavigation<navigation>();
   const [isOn, setIsOn] = useState(false);
   const { colors } = useTheme();
-  const { textRtlStyle, setToken, viewRtlStyle, isDark, currSymbol, hasRedirected, setHasRedirected } =
-    useValues();
+  const {
+    textRtlStyle,
+    setToken,
+    viewRtlStyle,
+    isDark,
+    currSymbol,
+    hasRedirected,
+    setHasRedirected,
+    homeScreenRedirectTrig,
+    setHomeScreenRedirectTrig,
+  } = useValues();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const isFocused = useIsFocused();
-  const { navigate } = useNavigation<navigation>();
+  const { navigate } = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
   const { rideRequestdata, statusCode } = useSelector(
     (state) => state.rideRequest
@@ -60,27 +65,51 @@ export function Home() {
   const [offlineLat, setOfflineLat] = useState();
   const [offlineLng, setOfflineLng] = useState();
   const { selfDriver } = useSelector((state: any) => state.account);
-  const [activeRiders, setActiveRiders] = useState(selfDriver?.total_active_rides);
+  const { allVehicle } = useSelector((state) => state.vehicleType);
+  const [activeRiders, setActiveRiders] = useState(
+    selfDriver?.total_active_rides
+  );
   const { translateData } = useSelector((state) => state.setting);
 
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(vehicleData());
+      return () => {};
+    }, [dispatch])
+  );
+
+  const vehicle_type_id = selfDriver?.vehicle_info?.vehicle_type_id;
+  const vehicleInfo = allVehicle?.find(
+    (vehicle) => vehicle?.id === vehicle_type_id
+  );
+
   const redirectToRide = () => {
-    setHasRedirected(true);
-    navigate("MyRide");
+    console.log(hasRedirected);
+    console.log(selfDriver?.last_active_ride?.id);
+    console.log("redirecting to ride");
+    const activeRideId = selfDriver?.last_active_ride?.id;
+    setHasRedirected(activeRideId);
+    navigate("PendingDetails", {
+      item: selfDriver?.last_active_ride,
+      vehicleDetail: vehicleInfo,
+    });
   };
-  
+
   useEffect(() => {
     const intervalId = setInterval(() => {
       dispatch(selfDriverData());
-      if (selfDriver?.total_active_rides > activeRiders) {
-        setHasRedirected(false);
+      if (
+        selfDriver?.total_active_rides == "0" &&
+        selfDriver?.total_pending_rides == "0"
+      ) {
+        setHasRedirected(-1);
       }
       setActiveRiders(selfDriver?.total_active_rides);
     }, 5000);
-    
+
     return () => clearInterval(intervalId);
   }, [selfDriver, dispatch]);
 
-  
   const rideData = [
     {
       id: "1",
@@ -183,7 +212,7 @@ export function Home() {
       navigate("RentalDetails", { ride });
     } else {
       console.log(`going to ride with id: ${ride.id}`);
-      navigation.navigate("Ride", { ride });
+      navigate("Ride", { ride });
     }
   };
 
@@ -305,9 +334,7 @@ export function Home() {
   };
 
   useEffect(() => {
-    if (selfDriver?.total_active_rides <= 0 && !hasRedirected) {
-      setHasRedirected(false);
-    }
+    setHomeScreenRedirectTrig(true);
     return () => {
       if (watchId?.current) {
         Geolocation.clearWatch(watchId.current);
@@ -444,7 +471,11 @@ export function Home() {
           <SwipeButton buttonText={translateData.backTOActive} />
         </View>
       )}
-      {selfDriver?.total_active_rides > 0 && !hasRedirected && redirectToRide()}
+      {typeof selfDriver?.last_active_ride?.id !== "undefined" &&
+        selfDriver?.last_active_ride?.id !== null &&
+        selfDriver?.last_active_ride?.id != hasRedirected &&
+        homeScreenRedirectTrig &&
+        redirectToRide()}
     </>
   );
 }

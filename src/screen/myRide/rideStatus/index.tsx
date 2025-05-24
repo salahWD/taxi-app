@@ -20,13 +20,13 @@ export function RideStatus() {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const { addressLoaded, setAddressLoaded } = useLoadingContext();
-  const rideStatusData = useRideStatusData();    
+  const rideStatusData = useRideStatusData();
 
   useEffect(() => {
     if (!addressLoaded) {
       setLoading(true);
-        setLoading(false);
-        setAddressLoaded(true);
+      setLoading(false);
+      setAddressLoaded(true);
     }
   }, [addressLoaded, setAddressLoaded]);
 
@@ -37,7 +37,10 @@ export function RideStatus() {
           onPress={() => setSelected(item.id)}
           style={[
             styles.container,
-            { backgroundColor: isDark ? colors.card : appColors.white, borderColor: colors.border },
+            {
+              backgroundColor: isDark ? colors.card : appColors.white,
+              borderColor: colors.border,
+            },
             { left: rtl ? windowHeight(-1) : windowHeight(0.8) },
             item.id === selected ? { borderColor: appColors.primary } : null,
           ]}
@@ -45,7 +48,9 @@ export function RideStatus() {
           <Text
             style={[
               styles.mediumTextBlack12,
-              item.id === selected ? { color: appColors.primary } : { color: appColors.secondaryFont },
+              item.id === selected
+                ? { color: appColors.primary }
+                : { color: appColors.secondaryFont },
             ]}
           >
             {item?.title}
@@ -56,7 +61,11 @@ export function RideStatus() {
   };
 
   return (
-    <View style={{ backgroundColor: isDark ? colors.background : appColors.graybackground }}>
+    <View
+      style={{
+        backgroundColor: isDark ? colors.background : appColors.graybackground,
+      }}
+    >
       {loading ? (
         <LoaderStatus />
       ) : (
@@ -67,7 +76,7 @@ export function RideStatus() {
             renderItem={renderItem}
             data={rideStatusData}
             inverted={rtl}
-            contentContainerStyle={{paddingHorizontal:windowHeight(0.3)}}
+            contentContainerStyle={{ paddingHorizontal: windowHeight(0.3) }}
           />
         </View>
       )}

@@ -7,6 +7,7 @@ import appColors from "../../../theme/appColors";
 import { GOOGLE_MAPS_APIKEY } from "../../../api/config";
 import { useSelector } from "react-redux";
 import styles from "../../../style/commanStyles";
+import { BackButton } from "../../../commonComponents/backButton";
 
 export function MapDetails() {
   const route = useRoute();
@@ -25,6 +26,13 @@ export function MapDetails() {
 
   return (
     <View style={styles.main}>
+      <BackButton
+        customStyle={{
+          position: "absolute",
+          borderRadius: 10,
+          zIndex: 999,
+        }}
+      />
       <MapView
         style={styles.main}
         initialRegion={{

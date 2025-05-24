@@ -1,18 +1,29 @@
-import { View, ScrollView, Modal, TouchableOpacity, Text } from "react-native";
-import React, { useState } from "react";
+import {
+  View,
+  ScrollView,
+  Modal,
+  TouchableOpacity,
+  Text,
+  Alert,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import { Header, Button } from "../../../commonComponents";
 import appColors from "../../../theme/appColors";
 import { Details } from "../component";
 import { Bill } from "../../home/endRide/component";
 import { Payment } from "../../home/endRide/component";
-import { useRoute, useTheme } from "@react-navigation/native";
+import { useNavigation, useRoute, useTheme } from "@react-navigation/native";
+import { RootStackParamList } from "../../../navigation/main/types";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import appFonts from "../../../theme/appFonts";
 import Icons from "../../../utils/icons/icons";
 import OTPTextView from "react-native-otp-textinput";
 import { useDispatch, useSelector } from "react-redux";
-import { rideStartData } from "../../../api/store/action";
+import { rideStartData, rideEndPatch } from "../../../api/store/action";
 import { useValues } from "../../../utils/context";
 import styles from "./styles";
+
+type navigation = NativeStackNavigationProp<RootStackParamList>;
 
 export function PendingDetails() {
   const route = useRoute();
@@ -22,12 +33,94 @@ export function PendingDetails() {
   const [warning, setWarning] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
   const dispatch = useDispatch();
-  const { viewRtlStyle, textRtlStyle, rtl, isDark, currSymbol, currValue } = useValues();
+  const { viewRtlStyle, textRtlStyle, rtl, isDark, currSymbol, currValue } =
+    useValues();
   const { colors } = useTheme();
-  const { translateData } = useSelector((state) => state.setting);
+  const { translateData, taxidoSettingData } = useSelector(
+    (state) => state.setting
+  );
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const navigation = useNavigation<navigation>();
+
+  const formatTime = (date: Date) => {
+    return date.toTimeString().slice(0, 8);
+  };
+
+  const startTimer = () => {
+    const now = new Date();
+
+    setStartTime(now);
+    setElapsedSeconds(0);
+    setIsRunning(true);
+    return now;
+  };
+
+  const endTrip = () => {
+    let payload = {
+      data: { status: "completed" },
+      ride_id: item?.id,
+    };
+
+    console.log(payload);
+    dispatch(rideEndPatch(payload))
+      .unwrap()
+      .then((res: any) => {
+        console.log("ride end patch logging", res);
+
+        if (res?.message && !res?.success) {
+          Alert.alert("Error", res.message);
+        } else {
+          navigation.navigate("PendingDetails", {
+            item: res,
+            vehicleDetail: vehicleDetail,
+          });
+          console.log("trip ended successfully");
+        }
+
+        setLoading(false);
+        setOtpModalVisible(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setOtpModalVisible(false);
+      });
+  };
 
   const gotoPickup = () => {
-    setOtpModalVisible(true);
+    if (taxidoSettingData.taxido_values.activation.ride_otp == "0") {
+      const now = startTimer();
+      let payload = {
+        ride_id: item?.id,
+        start_time: formatTime(now),
+      };
+      console.log("no otp required", payload);
+
+      dispatch(rideStartData(payload))
+        .unwrap()
+        .then((res: any) => {
+          console.log("responce of ride start data", res);
+          if (res?.message && !res?.success) {
+            Alert.alert("Error", res.message);
+          } else {
+            console.log(item);
+            navigation.navigate("PendingDetails", {
+              item: res,
+              vehicleDetail: vehicleDetail,
+            });
+            console.log("trip started successfully");
+          }
+          setLoading(false);
+          setOtpModalVisible(false);
+        })
+        .catch(() => {
+          setLoading(false);
+          setOtpModalVisible(false);
+        });
+    } else {
+      setOtpModalVisible(true);
+    }
   };
 
   const handleChange = (otp: string) => {
@@ -36,17 +129,32 @@ export function PendingDetails() {
       setWarning("");
     }
   };
+
   const closeModal = () => {
+    const now = startTimer();
     setOtpModalVisible(false);
     setLoading(true);
-    let payload: ReviewInterface = {
+    let payload = {
       ride_id: item?.id,
       otp: enteredOtp,
+      start_time: formatTime(now),
     };
+    console.log("otp sent", payload);
 
     dispatch(rideStartData(payload))
       .unwrap()
       .then((res: any) => {
+        console.log("responce of ride start data", res);
+        if (res?.message && !res?.success) {
+          Alert.alert("Error", res.message);
+        } else {
+          console.log(item);
+          navigation.navigate("PendingDetails", {
+            item: res,
+            vehicleDetail: vehicleDetail,
+          });
+          console.log("trip started successfully");
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -54,237 +162,261 @@ export function PendingDetails() {
       });
   };
 
+  useEffect(() => {
+    console.log(item?.ride_status?.slug);
+  }, []);
+
+  useEffect(() => {
+    if (isRunning && startTime) {
+      const timerInterval = setInterval(() => {
+        const now = new Date();
+        const secondsGap = Math.floor(
+          (now.getTime() - startTime.getTime()) / 1000
+        );
+        setElapsedSeconds(secondsGap);
+      }, 1000);
+
+      return () => clearInterval(timerInterval);
+    }
+  }, [isRunning, startTime]);
+
   return (
     <View style={styles.main}>
       <Header title={`${item?.ride_status?.name} Ride`} />
       <ScrollView showsVerticalScrollIndicator={false}>
-          <>
-            <Details rideDetails={item} vehicleDetail={vehicleDetail} />
-            <View style={styles.completedMainView}>
-              {status === "completed" ? (
-                <>
-                  <Bill rideDetails={item} />
-                  <Payment rideDetails={item} />
-                </>
-              ) : null}
-            </View>
-            <View style={styles.billMainView}>
+        <>
+          <Details rideDetails={item} vehicleDetail={vehicleDetail} />
+          <View style={styles.completedMainView}>
+            {status === "completed" ? (
+              <>
+                <Bill rideDetails={item} />
+                <Payment rideDetails={item} />
+              </>
+            ) : null}
+          </View>
+          <View style={styles.billMainView}>
+            <View
+              style={[
+                styles.viewBill,
+                {
+                  backgroundColor: isDark ? colors.card : appColors.white,
+
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.rideText,
+                  {
+                    color: isDark ? appColors.white : appColors.primaryFont,
+                    textAlign: textRtlStyle,
+                  },
+                ]}
+              >
+                {translateData.billSummary}
+              </Text>
               <View
                 style={[
-                  styles.viewBill,
+                  styles.billBorder,
                   {
-                    backgroundColor: isDark ? colors.card : appColors.white,
-
-                    borderColor: colors.border,
+                    borderBottomColor: colors.border,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.platformContainer,
+                  {
+                    flexDirection: viewRtlStyle,
                   },
                 ]}
               >
                 <Text
                   style={[
-                    styles.rideText,
+                    styles.text,
                     {
                       color: isDark ? appColors.white : appColors.primaryFont,
-                      textAlign: textRtlStyle,
                     },
                   ]}
                 >
-                  {translateData.billSummary}
+                  {translateData.rideFare}
                 </Text>
-                <View
+                <Text
                   style={[
-                    styles.billBorder,
+                    styles.text,
                     {
-                      borderBottomColor: colors.border,
-                    },
-                  ]}
-                />
-                <View
-                  style={[
-                    styles.platformContainer,
-                    {
-                      flexDirection: viewRtlStyle,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.text,
-                      {
-                        color: isDark ? appColors.white : appColors.primaryFont,
-                      },
-                    ]}
-                  >
-                    {translateData.rideFare}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.text,
-                      {
-                        color: isDark ? appColors.white : appColors.primaryFont,
-                      },
-                    ]}
-                  >
-                    {currSymbol}{currValue * item?.sub_total}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.platformContainer,
-                    {
-                      flexDirection: viewRtlStyle,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.text,
-                      {
-                        color: isDark ? appColors.white : appColors.primaryFont,
-                      },
-                    ]}
-                  >
-                    {translateData.tax}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.text,
-                      {
-                        color: isDark ? appColors.white : appColors.primaryFont,
-                      },
-                    ]}
-                  >
-                    {currSymbol}{currValue *item?.tax}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.platformContainer,
-                    {
-                      flexDirection: viewRtlStyle,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.text,
-                      {
-                        color: isDark ? appColors.white : appColors.primaryFont,
-                      },
-                    ]}
-                  >
-                    {translateData.platformFees}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.text,
-                      {
-                        color: isDark ? appColors.white : appColors.primaryFont,
-                      },
-                    ]}
-                  >
-                    {currSymbol}{currValue *item?.platform_fees}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.billBorder,
-                    {
-                      borderBottomColor: colors.border,
-                    },
-                  ]}
-                />
-                <View
-                  style={[
-                    styles.billView,
-                    {
-                      flexDirection: viewRtlStyle,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={{
-                      fontFamily: appFonts.regular,
                       color: isDark ? appColors.white : appColors.primaryFont,
-                    }}
-                  >
-                    {translateData.totalBill}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: appFonts.regular,
-                      color: appColors.price,
-                    }}
-                  >
-                    {currSymbol}{currValue * item?.total}
-                  </Text>
-                </View>
+                    },
+                  ]}
+                >
+                  {currSymbol}
+                  {currValue * item?.sub_total}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.platformContainer,
+                  {
+                    flexDirection: viewRtlStyle,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.text,
+                    {
+                      color: isDark ? appColors.white : appColors.primaryFont,
+                    },
+                  ]}
+                >
+                  {translateData.tax}
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    {
+                      color: isDark ? appColors.white : appColors.primaryFont,
+                    },
+                  ]}
+                >
+                  {currSymbol}
+                  {currValue * item?.tax}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.platformContainer,
+                  {
+                    flexDirection: viewRtlStyle,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.text,
+                    {
+                      color: isDark ? appColors.white : appColors.primaryFont,
+                    },
+                  ]}
+                >
+                  {translateData.platformFees}
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    {
+                      color: isDark ? appColors.white : appColors.primaryFont,
+                    },
+                  ]}
+                >
+                  {currSymbol}
+                  {currValue * item?.platform_fees}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.billBorder,
+                  {
+                    borderBottomColor: colors.border,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.billView,
+                  {
+                    flexDirection: viewRtlStyle,
+                  },
+                ]}
+              >
+                <Text
+                  style={{
+                    fontFamily: appFonts.regular,
+                    color: isDark ? appColors.white : appColors.primaryFont,
+                  }}
+                >
+                  {translateData.totalBill}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: appFonts.regular,
+                    color: appColors.price,
+                  }}
+                >
+                  {currSymbol}
+                  {currValue * item?.total}
+                </Text>
               </View>
             </View>
-            <View style={styles.pendingView}>
-              {item?.payment_status == "PENDING" ? (
-                <View
-                  style={[
-                    styles.completedPaymentView,
-                    {
-                      backgroundColor: isDark ? colors.card : appColors.white,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                >
-                  <Text style={styles.completedPaymentText}>
-                    {translateData.paymentPending}
+          </View>
+          <View style={styles.pendingView}>
+            {item?.payment_status == "PENDING" ? (
+              <View
+                style={[
+                  styles.completedPaymentView,
+                  {
+                    backgroundColor: isDark ? colors.card : appColors.white,
+                    borderColor: colors.border,
+                  },
+                ]}
+              >
+                <Text style={styles.completedPaymentText}>
+                  {translateData.paymentPending}
+                </Text>
+                <TouchableOpacity style={styles.refreshView}>
+                  <Text style={styles.refreshText}>
+                    {translateData.refresh}
                   </Text>
-                  <TouchableOpacity style={styles.refreshView}>
-                    <Text style={styles.refreshText}>
-                      {translateData.refresh}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={styles.paymentView}>
-                  <Payment rideDetails={item} />
-                </View>
-              )}
-            </View>
-            <View style={styles.bottomView} />
-          </>
-        {/* )} */}
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.paymentView}>
+                <Payment rideDetails={item} />
+              </View>
+            )}
+          </View>
+          <View style={styles.bottomView} />
+        </>
       </ScrollView>
       <View style={styles.buttonView}>
         {item?.ride_status?.slug == "accepted" && (
-          <Button
+          <Button /* pickup customer button */
             backgroundColor={appColors.primary}
             color={appColors.white}
-            title={translateData.pickupCustomer}
+            // title={translateData.pickupCustomer}
+            title={"Start Ride"}
             onPress={gotoPickup}
           />
         )}
         {item?.ride_status?.slug == "started" && (
-          <Button
+          <Button /* track ride button */
             backgroundColor={appColors.primary}
             color={appColors.white}
-            title={translateData.trackRide}
-            onPress={gotoPickup}
+            // title={translateData.trackRide}
+            title={"End Trip"}
+            onPress={endTrip}
           />
         )}
-        {item?.ride_status?.slug == "completed" &&
-          item?.payment_status == "PENDING" && (
-            <Button
-              backgroundColor={appColors.primary}
-              color={appColors.white}
-              title={translateData.requestPayment}
-              onPress={gotoPickup}
-            />
-          )}
-        {item?.ride_status?.slug == "completed" &&
-          item?.payment_status == "COMPLETE" && (
-            <Button
-              backgroundColor={appColors.primary}
-              color={appColors.white}
-              title={translateData.reviewCustomer}
-              onPress={gotoPickup}
-            />
-          )}
+        {
+          //item?.ride_status?.slug == "completed" &&
+          // item?.payment_status == "PENDING" && (
+          //   <Button /* pending button */
+          //     backgroundColor={appColors.primary}
+          //     color={appColors.white}
+          //     title={translateData.requestPayment}
+          //     onPress={gotoPickup}
+          //   />
+          //)}
+        }
+        {/* item?.payment_status == "COMPLETE" &&  <Button /* complete button 
+          / item?.ride_status?.slug == "completed" && (
+          //     backgroundColor={appColors.primary}
+          //     color={appColors.white}
+          //     title={translateData.reviewCustomer}
+          //     onPress={gotoPickup}
+          //   />
+          // )*/}
       </View>
       <Modal
         visible={otpModalVisible}

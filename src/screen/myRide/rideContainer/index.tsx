@@ -29,8 +29,9 @@ type PendingProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function RideContainer({ status }) {
   const { navigate } = useNavigation<PendingProp>();
-  const { viewRtlStyle, textRtlStyle, isDark, currValue, currSymbol } = useValues();
-  const { colors } = useTheme()
+  const { viewRtlStyle, textRtlStyle, isDark, currValue, currSymbol } =
+    useValues();
+  const { colors } = useTheme();
 
   const dispatch = useDispatch();
   const { rideGets } = useSelector((state) => state.ride);
@@ -44,18 +45,19 @@ export default function RideContainer({ status }) {
     (ride) => ride?.ride_status?.slug === status
   );
 
+  // console.log("accepted rides", acceptedRides);
+
   const paginatedData = acceptedRides?.slice(0, page * 5) || [];
 
-
-  const gotoMessage = (item) => {
-    navigate("Chat", {
-      driverId: item?.driver?.id,
-      riderId: item?.rider?.id,
-      rideId: item?.id,
-      riderName: item?.rider?.name,
-      riderImage: item?.rider?.profile_image?.original_url,
-    });
-  };
+  // const gotoMessage = (item) => {
+  //   navigate("Chat", {
+  //     driverId: item?.driver?.id,
+  //     riderId: item?.rider?.id,
+  //     rideId: item?.id,
+  //     riderName: item?.rider?.name,
+  //     riderImage: item?.rider?.profile_image?.original_url,
+  //   });
+  // };
 
   const gotoCall = (item) => {
     const phoneNumber = item?.driver?.phone;
@@ -66,7 +68,7 @@ export default function RideContainer({ status }) {
     useCallback(() => {
       dispatch(rideDataGets());
       dispatch(vehicleData());
-      return () => { };
+      return () => {};
     }, [dispatch])
   );
   const loadMoreData = () => {
@@ -105,13 +107,13 @@ export default function RideContainer({ status }) {
     });
   };
 
-
   const renderItem = ({ item }) => {
-    const { vehicle_type_id } = item.driver.vehicle_info;
+    const vehicle_type_id = item.driver?.vehicle_info?.vehicle_type_id;
     const vehicleData = allVehicle?.find(
       (vehicle) => vehicle?.id === vehicle_type_id
     );
-    const formattedDate = formatDates(item.created_at);
+    // const formattedDate = formatDates(item.created_at); // make it check for item.start_time instade of created_at
+    const formattedDate = formatDates(item.start_time ?? item.created_at);
 
     return (
       <View>
@@ -120,7 +122,15 @@ export default function RideContainer({ status }) {
           onPress={() => handlePress(item, vehicleData)}
           activeOpacity={0.9}
         >
-          <View style={[styles.rideInfoContainer, { backgroundColor: isDark ? colors.card : appColors.white, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.rideInfoContainer,
+              {
+                backgroundColor: isDark ? colors.card : appColors.white,
+                borderColor: colors.border,
+              },
+            ]}
+          >
             <View
               style={[
                 styles.profileInfoContainer,
@@ -134,7 +144,6 @@ export default function RideContainer({ status }) {
                     ? { uri: item?.rider?.profile_image?.original_url }
                     : Images.ProfileDefault
                 }
-
               />
 
               <View style={styles.profileTextContainer}>
@@ -165,18 +174,24 @@ export default function RideContainer({ status }) {
                     }
                   })}
                   <View
-                    style={[styles.ratingContainer, { flexDirection: viewRtlStyle }]}
+                    style={[
+                      styles.ratingContainer,
+                      { flexDirection: viewRtlStyle },
+                    ]}
                   >
                     <Text
-                      style={[styles.rating_count, {
-                        color: isDark ? appColors.white : appColors.primaryFont
-                      }]}
+                      style={[
+                        styles.rating_count,
+                        {
+                          color: isDark
+                            ? appColors.white
+                            : appColors.primaryFont,
+                        },
+                      ]}
                     >
                       {item?.rider?.rating_count}
                     </Text>
-                    <Text
-                      style={styles.reviews_count}
-                    >
+                    <Text style={styles.reviews_count}>
                       ({item?.rider?.reviews_count})
                     </Text>
                   </View>
@@ -184,22 +199,31 @@ export default function RideContainer({ status }) {
               </View>
               {item?.ride_status?.slug === "accepted" && (
                 <View
-                  style={[styles.acceptedContainer, {
-                    flexDirection: viewRtlStyle
-                  }]}
+                  style={[
+                    styles.acceptedContainer,
+                    {
+                      flexDirection: viewRtlStyle,
+                    },
+                  ]}
                 >
-                  <TouchableOpacity
-                    style={[styles.callContainer, {
-                      borderColor: colors.border,
-                    }]}
+                  {/* <TouchableOpacity
+                    style={[
+                      styles.callContainer,
+                      {
+                        borderColor: colors.border,
+                      },
+                    ]}
                     onPress={() => gotoMessage(item)}
                   >
                     <Icons.Message color={appColors.primary} />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                   <TouchableOpacity
-                    style={[styles.callContainer, {
-                      borderColor: colors.border,
-                    }]}
+                    style={[
+                      styles.callContainer,
+                      {
+                        borderColor: colors.border,
+                      },
+                    ]}
                     onPress={() => gotoCall(item)}
                   >
                     <Icons.Call color={appColors.primary} />
@@ -207,19 +231,13 @@ export default function RideContainer({ status }) {
                 </View>
               )}
             </View>
-            <View style={[styles.containerService, { flexDirection: viewRtlStyle }]}>
-              <View
-                style={styles.serviceContainer}
-              >
-                <Text
-                  style={styles.serviceName}
-                >
-                  {item?.service?.name}
-                </Text>
+            <View
+              style={[styles.containerService, { flexDirection: viewRtlStyle }]}
+            >
+              <View style={styles.serviceContainer}>
+                <Text style={styles.serviceName}>{item?.service?.name}</Text>
               </View>
-              <View
-                style={styles.service_category_Container}
-              >
+              <View style={styles.service_category_Container}>
                 <Text
                   style={{
                     color: appColors.primaryFont,
@@ -230,9 +248,14 @@ export default function RideContainer({ status }) {
                 </Text>
               </View>
             </View>
-            <View style={[styles.dashedLine, {
-              borderColor: colors.border,
-            }]} />
+            <View
+              style={[
+                styles.dashedLine,
+                {
+                  borderColor: colors.border,
+                },
+              ]}
+            />
             <View style={{ flexDirection: viewRtlStyle }}>
               <Image
                 style={styles.tripImage}
@@ -242,25 +265,39 @@ export default function RideContainer({ status }) {
                 <Text
                   style={[
                     styles.tripIDText,
-                    { color: isDark ? appColors.white : appColors.primaryFont, textAlign: textRtlStyle },
+                    {
+                      color: isDark ? appColors.white : appColors.primaryFont,
+                      textAlign: textRtlStyle,
+                    },
                   ]}
                 >
                   #{item?.ride_number}
                 </Text>
-                <Text style={[styles.tripCostText, { textAlign: textRtlStyle }]}>
-                  {currSymbol}{currValue * item.total}
+                <Text
+                  style={[styles.tripCostText, { textAlign: textRtlStyle }]}
+                >
+                  {currSymbol}
+                  {currValue * item.total}
                 </Text>
               </View>
-              <View
-                style={styles.iconContainer1}
-              >
-                <View style={[styles.containerIcon, { flexDirection: viewRtlStyle }]}>
+              <View style={styles.iconContainer1}>
+                <View
+                  style={[
+                    styles.containerIcon,
+                    { flexDirection: viewRtlStyle },
+                  ]}
+                >
                   <View style={styles.calanderSmall}>
                     <Icons.CalanderSmall />
                   </View>
                   <Text style={styles.tripDateText}>{formattedDate.date}</Text>
                 </View>
-                <View style={[styles.containerIcon, { flexDirection: viewRtlStyle }]}>
+                <View
+                  style={[
+                    styles.containerIcon,
+                    { flexDirection: viewRtlStyle },
+                  ]}
+                >
                   <View style={styles.clock}>
                     <Icons.Clock />
                   </View>
@@ -284,7 +321,9 @@ export default function RideContainer({ status }) {
         <View style={styles.noDataContainer}>
           <Image source={Images.noRides} style={styles.noDataImage} />
           <Text style={styles.noDataText}>{translateData.norideTitle}</Text>
-          <Text style={styles.noDataDesc}>{translateData.norideDescription}</Text>
+          <Text style={styles.noDataDesc}>
+            {translateData.norideDescription}
+          </Text>
         </View>
       ) : (
         <>
@@ -310,6 +349,4 @@ export default function RideContainer({ status }) {
       )}
     </View>
   );
-
-
 }

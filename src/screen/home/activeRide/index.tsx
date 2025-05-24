@@ -26,20 +26,19 @@ export function ActiveRide() {
   const { isDark } = useValues();
   const { rideData, ride_Id } = route.params || {};
   const { translateData } = useSelector((state) => state.setting);
-  
-  const [loading, setLoading] = useState(false); 
-  
+
+  const [loading, setLoading] = useState(false);
+
   const gotoOtp = () => {
     navigation.navigate("OtpRide", { rideData, ride_Id });
   };
 
-
   const handleRefresh = () => {
-    setLoading(true); 
+    setLoading(true);
 
     setTimeout(() => {
-      setLoading(false);  
-    }, 5000); 
+      setLoading(false);
+    }, 5000);
   };
 
   return (

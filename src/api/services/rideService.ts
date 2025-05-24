@@ -1,5 +1,5 @@
 import { ride,startRide } from "../endpoints/rideEndPoint";
-import { GET_API, POST_API, PUT_API } from "../methods";
+import { GET_API, PATCH_API, POST_API, PUT_API } from "../methods";
 import {RidePostInterface} from "../interface/rideInterface";
 
 export const rideDataGet = async (ride_id: number, ) => {
@@ -42,13 +42,23 @@ export const rideUpdate = async ({ data, ride_id }: { data: any; ride_id: number
       });
 };
 
+export const rideEnd = async ({ data, ride_id }: { data: any; ride_id: number }) => {
+  return PATCH_API(data,`${ride}/${ride_id}`) 
+      .then((res) => {
+          return res;
+      })
+      .catch((e) => {
+          return e?.response;
+      });
+};
 
 
 const rideServices = {
     rideDataGet,
     rideDataGets,
     userstartRide,
-    rideUpdate
+    rideUpdate,
+    rideEnd
 };
 
 export default rideServices;

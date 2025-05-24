@@ -16,7 +16,8 @@ interface UserDetailsProps {
 export function UserDetails({ RideData }: UserDetailsProps) {
   const { currSymbol, currValue, viewRtlStyle, isDark } = useValues();
   const { colors } = useTheme();
-  const rideDate = new Date(RideData?.created_at);
+  // const rideDate = new Date(RideData?.created_at);
+  const rideDate = new Date(RideData?.start_time ?? RideData?.created_at);
   const months = [
     "Jan",
     "Feb",
