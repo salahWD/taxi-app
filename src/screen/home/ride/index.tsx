@@ -116,6 +116,7 @@ export function Ride() {
     dispatch(bidDataPost(payload))
       .unwrap()
       .then((res: any) => {
+        console.log(res, "bidDataPost response");
         if (res?.id) {
           setBidID(res.id);
           Alert.alert("Success", "The Fare Was Sent Successfully");

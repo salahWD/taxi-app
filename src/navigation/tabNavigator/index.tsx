@@ -28,6 +28,7 @@ export default function App() {
             screenOptions={{
                 tabBarStyle: styles.tabBarContainer,
                 headerShown: false,
+                lazy: true,
             }}
         >
             <Tab.Screen

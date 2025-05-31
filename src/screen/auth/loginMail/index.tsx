@@ -21,11 +21,11 @@ export function LoginMail() {
   const dispatch = useDispatch<AppDispatch>();
   const { isDark } = useValues();
   const { translateData } = useSelector((state) => state.setting);
-  const [email, setEmail] = useState<string>(""); 
+  const [email, setEmail] = useState<string>("");
   const [demouser, setDemouser] = useState<boolean>(false);
 
-  const backgroundColor = useMemo(() => 
-    isDark ? appColors.primaryFont : appColors.white, 
+  const backgroundColor = useMemo(
+    () => (isDark ? appColors.primaryFont : appColors.white),
     [isDark]
   );
 
@@ -35,10 +35,12 @@ export function LoginMail() {
 
   const gotoOTP = useCallback(() => {
     const payload: UserLoginEmailInterface = { email };
+    console.log(email, "email");
 
     dispatch(userMailLogin(payload))
       .unwrap()
       .then((res) => {
+        console.log(res, "result");
         if (res?.success) {
           navigation.navigate("OtpVerify", { email, demouser });
           notificationHelper("OTP Sent", translateData?.otpSend, "success");
@@ -48,7 +50,10 @@ export function LoginMail() {
 
   return (
     <View style={[styles.main, { backgroundColor }]}>
-      <Header showBackButton={false} backgroundColor={isDark ? appColors.bgDark : appColors.graybackground} />
+      <Header
+        showBackButton={false}
+        backgroundColor={isDark ? appColors.bgDark : appColors.graybackground}
+      />
       <Background />
       <View style={styles.loginView}>
         <LoginView

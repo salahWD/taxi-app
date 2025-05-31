@@ -17,6 +17,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const userLogin = createAsyncThunk(
   USER_LOGIN,
   async (data: DriverLoginInterface) => {
+    console.log(USER_LOGIN, "data", data);
     const response = await authServices.userLogin(data);
     return response?.data;
   }

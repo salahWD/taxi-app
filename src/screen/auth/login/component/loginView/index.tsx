@@ -39,7 +39,6 @@ export function LoginView({
     }, [dispatch])
   );
 
-
   const handlePhoneNumberChange = (newPhoneNumber: string) => {
     setPhoneNumber(newPhoneNumber);
     setError("");
@@ -47,13 +46,13 @@ export function LoginView({
     if (newPhoneNumber.length === 10) {
       Keyboard.dismiss();
     }
-
   };
   const handleGetOTP = () => {
     if (!phoneNumber) {
       setError(translateData.enterYourPhone);
       return;
     }
+    console.log("first testttt");
     gotoOTP();
     setError("");
   };
@@ -63,9 +62,6 @@ export function LoginView({
     setDemouser(true);
   };
 
-
-
-
   return (
     <View
       style={[
@@ -74,8 +70,13 @@ export function LoginView({
       ]}
     >
       <View style={styles.subView}>
-        <AuthTitle title={translateData.authTitle} subTitle={translateData.subTitle} />
-        <View style={[styles.countryCodeContainer, { flexDirection: viewRtlStyle }]}>
+        <AuthTitle
+          title={translateData.authTitle}
+          subTitle={translateData.subTitle}
+        />
+        <View
+          style={[styles.countryCodeContainer, { flexDirection: viewRtlStyle }]}
+        >
           <View
             style={[
               styles.codeComponent,

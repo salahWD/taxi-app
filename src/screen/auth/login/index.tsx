@@ -34,35 +34,60 @@ export function Login() {
       phone: phoneNumber,
       country_code: formattedCountryCode,
     };
-
+    console.log(payload, "Login payload");
     dispatch(userLogin(payload))
       .unwrap()
       .then((res) => {
+        console.log(res, "Login response");
+        console.log({ countryCode, phoneNumber, demouser }, "data");
         if (res?.success) {
           navigation.navigate("Otp", { countryCode, phoneNumber, demouser });
-          notificationHelper("OTP sent", translateData?.otpSend || "OTP has been sent.", "success");
+          notificationHelper(
+            "OTP sent",
+            translateData?.otpSend || "OTP has been sent.",
+            "success"
+          );
         }
       });
-  }, [dispatch, phoneNumber, formattedCountryCode, navigation, demouser, translateData]);
+  }, [
+    dispatch,
+    phoneNumber,
+    formattedCountryCode,
+    navigation,
+    demouser,
+    translateData,
+  ]);
 
   return (
     <View
       style={[
         styles.main,
-        { backgroundColor: isDark ? appColors.darkThemeSub : appColors.graybackground },
+        {
+          backgroundColor: isDark
+            ? appColors.darkThemeSub
+            : appColors.graybackground,
+        },
       ]}
     >
-      <Header showBackButton={false} backgroundColor={isDark ? appColors.bgDark : appColors.graybackground} />
+      <Header
+        showBackButton={false}
+        backgroundColor={isDark ? appColors.bgDark : appColors.graybackground}
+      />
       <Background />
 
       <View style={styles.loginView}>
         <LoginView
-          gotoOTP={gotoOTP}
+          gotoOTP={() => {
+            console.log("hi there");
+            gotoOTP();
+          }}
           phoneNumber={phoneNumber}
           setPhoneNumber={setPhoneNumber}
           countryCode={countryCode}
           setCountryCode={setCountryCode}
-          borderColor={isDark ? appColors.primaryFont : appColors.graybackground}
+          borderColor={
+            isDark ? appColors.primaryFont : appColors.graybackground
+          }
           demouser={demouser}
           setDemouser={setDemouser}
         />

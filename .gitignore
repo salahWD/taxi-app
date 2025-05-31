@@ -99,3 +99,5 @@ temp/
 # Backup / Lock files
 **/.cxx/
 **/.cxx/**
+
+my-release-key.keystore

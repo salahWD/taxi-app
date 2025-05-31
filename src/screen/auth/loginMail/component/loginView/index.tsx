@@ -22,17 +22,16 @@ export function LoginView({
   email,
   setEmail,
   setDemouser,
-  
 }: LoginViewProps) {
   const [error, setError] = useState("");
-  const {  isDark } = useValues();
+  const { isDark } = useValues();
   const dispatch = useDispatch<AppDispatch>();
   const { navigate } = useNavigation<navigation>();
   const { loading } = useSelector((state) => state.auth);
   const { translateData, settingData } = useSelector((state) => state.setting);
 
-
   const handleGetOTP = () => {
+    console.log(email, "email");
     if (!email) {
       setError(translateData.enterYourPhone);
       return;
@@ -157,10 +156,10 @@ export function LoginView({
         </Text>
       </View> */}
       {settingData?.values?.activation?.demo_mode == 1 ? (
-      <TouchableOpacity style={styles.demoBtn} onPress={gotoDemo}>
-        <Text style={styles.demoTitle}>{translateData.demoDriver}</Text>
-      </TouchableOpacity>
-      ):null}
+        <TouchableOpacity style={styles.demoBtn} onPress={gotoDemo}>
+          <Text style={styles.demoTitle}>{translateData.demoDriver}</Text>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 }

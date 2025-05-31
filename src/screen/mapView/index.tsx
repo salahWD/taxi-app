@@ -13,7 +13,7 @@ import { useSelector } from "react-redux";
 export function Map({ userLocation }) {
   const { isDark } = useValues();
   const route = useRoute();
-  const { locationDetails } = route.params || {};
+  const { locationDetails } = route?.params || {};
   const { translateData } = useSelector((state) => state.setting);
 
   useEffect(() => {
@@ -32,8 +32,7 @@ export function Map({ userLocation }) {
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
         } else {
         }
-      } catch (err) {
-      }
+      } catch (err) {}
     };
 
     requestLocationPermission();
