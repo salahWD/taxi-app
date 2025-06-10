@@ -31,7 +31,7 @@ export function LoginView({
   const { translateData, settingData } = useSelector((state) => state.setting);
 
   const handleGetOTP = () => {
-    console.log(email, "email");
+    console.log(email, "emmmmmail");
     if (!email) {
       setError(translateData.enterYourPhone);
       return;

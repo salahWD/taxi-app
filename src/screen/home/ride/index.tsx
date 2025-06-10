@@ -51,6 +51,7 @@ export function Ride() {
   } = useValues();
   const { colors } = useTheme();
   const [bidId, setBidID] = useState<number | null>(null);
+  const [buttonLoading, setButtonLoading] = useState<boolean>(false);
   const route = useRoute();
   const { ride } = route.params;
   const [value, setValue] = useState(ride.ride_fare);
@@ -102,12 +103,15 @@ export function Ride() {
         setHasRedirected(-1);
       }
       setActiveRiders(selfDriver?.total_active_rides || 0);
-    }, 5000);
+    }, 1000);
 
     return () => clearInterval(intervalId);
   }, [selfDriver, dispatch]);
 
   const gotoAcceptFare = async () => {
+    console.log(buttonLoading, " <===== buttonLoading");
+    if (buttonLoading) return;
+    setButtonLoading(true);
     let payload: DriverRideRequest = {
       amount: value,
       ride_request_id: ride.id,
@@ -124,7 +128,17 @@ export function Ride() {
           Alert.alert("Error", res.message);
           console.log("Error in bidDataPost response:", res);
         }
+        setButtonLoading(false);
+      })
+      .catch((error: any) => {
+        console.error("Error in bidDataPost:", error);
+        Alert.alert(
+          "Error",
+          "There was an error sending the fare. Please try again later."
+        );
+        setButtonLoading(false);
       });
+    console.log(buttonLoading, " <= buttonLoading");
   };
 
   // useFocusEffect(
@@ -252,11 +266,12 @@ export function Ride() {
             <View style={styles.button}>
               <Button
                 onPress={gotoAcceptFare}
-                title={`${translateData.acceptFareon}${currSymbol} ${
+                title={`${translateData.acceptFareon} ${currSymbol} ${
                   currValue * value
                 }`}
                 backgroundColor={buttonColor}
                 color={appColors.white}
+                loading={buttonLoading}
               />
             </View>
           </View>

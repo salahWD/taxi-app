@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -35,7 +35,7 @@ export function LoginMail() {
 
   const gotoOTP = useCallback(() => {
     const payload: UserLoginEmailInterface = { email };
-    console.log(email, "email");
+    console.log(email, "email 22");
 
     dispatch(userMailLogin(payload))
       .unwrap()
@@ -44,6 +44,8 @@ export function LoginMail() {
         if (res?.success) {
           navigation.navigate("OtpVerify", { email, demouser });
           notificationHelper("OTP Sent", translateData?.otpSend, "success");
+        } else {
+          Alert.alert("Error", res?.message);
         }
       });
   }, [dispatch, email, demouser, navigation, translateData]);

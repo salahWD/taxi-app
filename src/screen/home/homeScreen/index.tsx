@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   View,
   Text,
@@ -58,18 +64,24 @@ export function Home() {
   const isFocused = useIsFocused();
   const { navigate } = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
-  const { rideRequestdata, statusCode } = useSelector(
-    (state) => state.rideRequest
-  );
-  const [watchId, setWatchId] = useState(null);
+
+  const { selfDriver, allVehicle, rideRequestdata, statusCode, translateData } =
+    useSelector((state: any) => ({
+      selfDriver: state.account.selfDriver,
+      allVehicle: state.vehicleType.allVehicle,
+      rideRequestdata: state.rideRequest.rideRequestdata,
+      statusCode: state.rideRequest.statusCode,
+      translateData: state.setting.translateData,
+    }));
+
+  // const [watchId, setWatchId] = useState(null);
+  const watchId = useRef<number | null>(null);
+
   const [offlineLat, setOfflineLat] = useState();
   const [offlineLng, setOfflineLng] = useState();
-  const { selfDriver } = useSelector((state: any) => state.account);
-  const { allVehicle } = useSelector((state) => state.vehicleType);
   const [activeRiders, setActiveRiders] = useState(
     selfDriver?.total_active_rides
   );
-  const { translateData } = useSelector((state) => state.setting);
 
   useFocusEffect(
     useCallback(() => {
@@ -95,7 +107,38 @@ export function Home() {
     });
   };
 
+  const rideData = useMemo(
+    () => [
+      {
+        id: "1",
+        dashBoardData: `${currSymbol}${selfDriver?.total_driver_commission}`,
+        title: `${translateData.totalEarning}`,
+        screen: "MyWallet",
+      },
+      {
+        id: "2",
+        dashBoardData: selfDriver?.total_pending_rides,
+        title: `${translateData.pendingRides}`,
+        screen: "MyRide",
+      },
+      {
+        id: "3",
+        dashBoardData: selfDriver?.total_complete_rides,
+        title: `${translateData.completedRides}`,
+        screen: "MyRide",
+      },
+      {
+        id: "4",
+        dashBoardData: selfDriver?.total_cancel_rides,
+        title: `${translateData.cancelledRides}`,
+        screen: "MyRide",
+      },
+    ],
+    [currSymbol, selfDriver, translateData]
+  );
+
   useEffect(() => {
+    console.log(rideData);
     const intervalId = setInterval(() => {
       dispatch(selfDriverData());
       if (
@@ -108,34 +151,7 @@ export function Home() {
     }, 5000);
 
     return () => clearInterval(intervalId);
-  }, [selfDriver, dispatch]);
-
-  const rideData = [
-    {
-      id: "1",
-      dashBoardData: `${currSymbol}${selfDriver?.total_driver_commission}`,
-      title: `${translateData.totalEarning}`,
-      screen: "MyWallet",
-    },
-    {
-      id: "2",
-      dashBoardData: selfDriver?.total_pending_rides,
-      title: `${translateData.pendingRides}`,
-      screen: "MyRide",
-    },
-    {
-      id: "3",
-      dashBoardData: selfDriver?.total_complete_rides,
-      title: `${translateData.completedRides}`,
-      screen: "MyRide",
-    },
-    {
-      id: "4",
-      dashBoardData: selfDriver?.total_cancel_rides,
-      title: `${translateData.cancelledRides}`,
-      screen: "MyRide",
-    },
-  ];
+  }, [dispatch]);
 
   const haversineDistance = (coords1, coords2) => {
     const toRad = (value) => (value * Math.PI) / 180;
@@ -168,12 +184,11 @@ export function Home() {
             const currentPosition = { latitude, longitude };
             if (lastPosition) {
               const distance = haversineDistance(lastPosition, currentPosition);
-              getZoneValue(latitude, longitude);
-              setOfflineLat(latitude);
-              setOfflineLng(longitude);
               if (distance >= 50) {
                 lastPosition = currentPosition;
                 getZoneValue(latitude, longitude);
+                setOfflineLat(latitude);
+                setOfflineLng(longitude);
               }
             } else {
               lastPosition = currentPosition;
@@ -217,7 +232,12 @@ export function Home() {
   };
 
   useEffect(() => {
+    console.log(rideRequestdata, " ===== rideRequestdata in home screen");
+  }, [rideRequestdata]);
+
+  useEffect(() => {
     const zone_id = 2;
+    console.log(rideRequestDataGet(zone_id));
     dispatch(rideRequestDataGet(zone_id));
 
     const intervalId = setInterval(() => {
@@ -272,8 +292,9 @@ export function Home() {
     dispatch(driverZone(payload))
       .unwrap()
       .then((res: any) => {
-        if (res?.success) {
-        } else {
+        console.log(res, "==== zone update response");
+        if (!res?.success) {
+          console.warn("Zone update failed", res);
         }
       });
   };

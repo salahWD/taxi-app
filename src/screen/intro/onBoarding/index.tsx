@@ -19,7 +19,11 @@ import Icons from "../../../utils/icons/icons";
 import { useTheme } from "@react-navigation/native";
 import { fontSizes } from "../../../theme/appConstant";
 import { useDispatch, useSelector } from "react-redux";
-import { languageDataGet, settingDataGet, translateDataGet } from "../../../api/store/action";
+import {
+  languageDataGet,
+  settingDataGet,
+  translateDataGet,
+} from "../../../api/store/action";
 import { getValue, setValue } from "../../../utils/localstorage";
 
 type OnboardingProps = NativeStackNavigationProp<RootStackParamList>;
@@ -27,7 +31,8 @@ type OnboardingProps = NativeStackNavigationProp<RootStackParamList>;
 export function OnBoarding() {
   const { navigate } = useNavigation<OnboardingProps>();
   const { colors } = useTheme();
-  const { settingData, languageData, translateData, taxidoSettingData } = useSelector((state) => state.setting);
+  const { settingData, languageData, translateData, taxidoSettingData } =
+    useSelector((state) => state.setting);
   const dispatch = useDispatch();
   const swiperRef = useRef<Swiper | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
@@ -42,10 +47,9 @@ export function OnBoarding() {
     useCallback(() => {
       dispatch(languageDataGet());
       dispatch(settingDataGet());
-      dispatch(translateDataGet())
+      dispatch(translateDataGet());
     }, [dispatch])
   );
-
 
   useEffect(() => {
     const setDefaultLanguage = async () => {
@@ -88,7 +92,7 @@ export function OnBoarding() {
           await setValue("selectedLanguage", matchingLang.locale);
         } else {
         }
-      } catch (error) { }
+      } catch (error) {}
     };
 
     loadLanguage();
@@ -112,7 +116,7 @@ export function OnBoarding() {
     setSelectedLanguage(selectedValue);
     try {
       await setValue("selectedLanguage", selectedValue);
-    } catch (error) { }
+    } catch (error) {}
   };
 
   const handleNavigation = () => {
@@ -131,106 +135,128 @@ export function OnBoarding() {
     }
   };
 
-
-  return (
-    <Swiper
-      loop={false}
-      ref={swiperRef}
-      activeDotStyle={styles.activeStyle}
-      removeClippedSubviews={true}
-      paginationStyle={styles.paginationStyle}
-      dotColor={isDark ? appColors.dotPrimary : appColors.subPrimary}
-    >
-      {taxidoSettingData?.taxido_values?.onboarding?.map((slide, index) => (
-        <View
-          style={[
-            styles.slideContainer,
-            { backgroundColor: colors.background },
-          ]}
-          key={index}
-        >
-          <View
-            style={[styles.languageContainer, { flexDirection: viewRtlStyle }]}
-          >
-            <DropDownPicker
-              open={open}
-              value={selectedLanguage}
-              items={items}
-              setOpen={setOpen}
-              placeholder={'Language'}
-              setValue={async (callback) => {
-                const selectedValue =
-                  callback instanceof Function
-                    ? callback(selectedLanguage)
-                    : callback;
-                if (!selectedValue) return;
-
-                setSelectedLanguage(selectedValue);
-                dispatch(settingDataGet());
-                dispatch(translateDataGet())
-
-                try {
-                  await setValue(
-                    "selectedLanguage",
-                    JSON.stringify(selectedValue)
-                  );
-                } catch (error) {
-                }
-              }}
-              setItems={setItems}
-              onChangeValue={handleLanguageChange}
-              scrollViewProps={{
-                showsVerticalScrollIndicator: false,
-              }}
-              dropDownContainerStyle={[
-                styles.dropdownManu,
-                { backgroundColor: colors.card },
+  if (taxidoSettingData && taxidoSettingData?.taxido_values?.onboarding) {
+    return (
+      <Swiper
+        loop={false}
+        ref={swiperRef}
+        activeDotStyle={styles.activeStyle}
+        removeClippedSubviews={true}
+        paginationStyle={styles.paginationStyle}
+        dotColor={isDark ? appColors.dotPrimary : appColors.subPrimary}
+      >
+        {taxidoSettingData &&
+          taxidoSettingData?.taxido_values?.onboarding?.map((slide, index) => (
+            <View
+              style={[
+                styles.slideContainer,
+                { backgroundColor: colors.background },
               ]}
-              labelStyle={[styles.labelStyle, { color: colors.text }]}
-              arrowIconStyle={{
-                right: windowHeight(8)
-              }}
-
-              containerStyle={styles.dropdownContainer}
-              style={styles.dropdown}
-              textStyle={{ color: colors.text, fontSize: fontSizes.FONT4 }}
-              theme={isDark ? "DARK" : "LIGHT"}
-            />
-            <TouchableOpacity activeOpacity={0.7} onPress={handleNavigation}>
-              <Text style={[styles.skipText, { borderColor: colors.border }]}>
-                {translateData.skip}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <Image
-            style={styles.imageBackground}
-            source={{ uri: slide?.onboarding_image?.original_url }}
-          />
-          <View
-            style={[styles.imageBgView, { backgroundColor: colors.background }]}
-          >
-            <ImageBackground
-              resizeMode="stretch"
-              style={styles.img}
-              source={imageDarkBottom}
+              key={index}
             >
-              <Text style={[styles.title, { color: isDark ? appColors.white : appColors.primaryFont }]}>
-                {slide.title}
-              </Text>
-              <Text style={[styles.description]}>
-                {translateData.description}
-              </Text>
-              <TouchableOpacity
-                style={[styles.backArrow, { transform: [{ scaleX: -1 }] }]}
-                onPress={() => handleNext(index)}
+              <View
+                style={[
+                  styles.languageContainer,
+                  { flexDirection: viewRtlStyle },
+                ]}
               >
-                <Icons.Back color={appColors.white} />
-              </TouchableOpacity>
-            </ImageBackground>
-          </View>
-        </View>
-      ))}
-    </Swiper>
-  );
-}
+                <DropDownPicker
+                  open={open}
+                  value={selectedLanguage}
+                  items={items}
+                  setOpen={setOpen}
+                  placeholder={"Language"}
+                  setValue={async (callback) => {
+                    const selectedValue =
+                      callback instanceof Function
+                        ? callback(selectedLanguage)
+                        : callback;
+                    if (!selectedValue) return;
 
+                    setSelectedLanguage(selectedValue);
+                    dispatch(settingDataGet());
+                    dispatch(translateDataGet());
+
+                    try {
+                      await setValue(
+                        "selectedLanguage",
+                        JSON.stringify(selectedValue)
+                      );
+                    } catch (error) {}
+                  }}
+                  setItems={setItems}
+                  onChangeValue={handleLanguageChange}
+                  scrollViewProps={{
+                    showsVerticalScrollIndicator: false,
+                  }}
+                  dropDownContainerStyle={[
+                    styles.dropdownManu,
+                    { backgroundColor: colors.card },
+                  ]}
+                  labelStyle={[styles.labelStyle, { color: colors.text }]}
+                  arrowIconStyle={{
+                    right: windowHeight(8),
+                  }}
+                  containerStyle={styles.dropdownContainer}
+                  style={styles.dropdown}
+                  textStyle={{
+                    color: colors.text,
+                    fontSize: fontSizes.FONT4,
+                  }}
+                  theme={isDark ? "DARK" : "LIGHT"}
+                />
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={handleNavigation}
+                >
+                  <Text
+                    style={[styles.skipText, { borderColor: colors.border }]}
+                  >
+                    {translateData.skip}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <Image
+                style={styles.imageBackground}
+                source={{ uri: slide?.onboarding_image?.original_url }}
+              />
+              <View
+                style={[
+                  styles.imageBgView,
+                  { backgroundColor: colors.background },
+                ]}
+              >
+                <ImageBackground
+                  resizeMode="stretch"
+                  style={styles.img}
+                  source={imageDarkBottom}
+                >
+                  <Text
+                    style={[
+                      styles.title,
+                      {
+                        color: isDark ? appColors.white : appColors.primaryFont,
+                      },
+                    ]}
+                  >
+                    {slide.title}
+                  </Text>
+                  <Text style={[styles.description]}>
+                    {translateData.description}
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.backArrow, { transform: [{ scaleX: -1 }] }]}
+                    onPress={() => handleNext(index)}
+                  >
+                    <Icons.Back color={appColors.white} />
+                  </TouchableOpacity>
+                </ImageBackground>
+              </View>
+            </View>
+          ))}
+      </Swiper>
+    );
+  } else {
+    return <Text>loading...</Text>;
+  }
+}

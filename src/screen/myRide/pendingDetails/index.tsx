@@ -57,38 +57,40 @@ export function PendingDetails() {
     return now;
   };
 
-  const endTrip = () => {
-    let payload = {
-      data: { status: "completed" },
-      ride_id: item?.id,
-    };
+  // const endTrip = () => {
+  //   let payload = {
+  //     data: { status: "completed" },
+  //     ride_id: item?.id,
+  //   };
 
-    console.log(payload);
-    dispatch(rideEndPatch(payload))
-      .unwrap()
-      .then((res: any) => {
-        console.log("ride end patch logging", res);
+  //   console.log(payload);
+  //   dispatch(rideEndPatch(payload))
+  //     .unwrap()
+  //     .then((res: any) => {
+  //       console.log("ride end patch logging", res);
 
-        if (res?.message && !res?.success) {
-          Alert.alert("Error", res.message);
-        } else {
-          navigation.navigate("PendingDetails", {
-            item: res,
-            vehicleDetail: vehicleDetail,
-          });
-          console.log("trip ended successfully");
-        }
+  //       if (res?.message && !res?.success) {
+  //         Alert.alert("Error", res.message);
+  //       } else {
+  //         navigation.navigate("PendingDetails", {
+  //           item: res,
+  //           vehicleDetail: vehicleDetail,
+  //         });
+  //         console.log("trip ended successfully");
+  //       }
 
-        setLoading(false);
-        setOtpModalVisible(false);
-      })
-      .catch(() => {
-        setLoading(false);
-        setOtpModalVisible(false);
-      });
-  };
+  //       setLoading(false);
+  //       setOtpModalVisible(false);
+  //     })
+  //     .catch(() => {
+  //       setLoading(false);
+  //       setOtpModalVisible(false);
+  //     });
+  // };
 
   const gotoPickup = () => {
+    if (loading) return;
+    setLoading(true);
     if (taxidoSettingData.taxido_values.activation.ride_otp == "0") {
       const now = startTimer();
       let payload = {
@@ -131,6 +133,7 @@ export function PendingDetails() {
   };
 
   const closeModal = () => {
+    if (loading) return;
     const now = startTimer();
     setOtpModalVisible(false);
     setLoading(true);
@@ -386,7 +389,8 @@ export function PendingDetails() {
             color={appColors.white}
             // title={translateData.pickupCustomer}
             title={"Start Ride"}
-            onPress={gotoPickup}
+            onPress={() => gotoPickup()}
+            loading={loading}
           />
         )}
         {item?.ride_status?.slug == "started" && (
@@ -395,28 +399,10 @@ export function PendingDetails() {
             color={appColors.white}
             // title={translateData.trackRide}
             title={"End Trip"}
-            onPress={endTrip}
+            onPress={() => gotoPickup()}
+            loading={loading}
           />
         )}
-        {
-          //item?.ride_status?.slug == "completed" &&
-          // item?.payment_status == "PENDING" && (
-          //   <Button /* pending button */
-          //     backgroundColor={appColors.primary}
-          //     color={appColors.white}
-          //     title={translateData.requestPayment}
-          //     onPress={gotoPickup}
-          //   />
-          //)}
-        }
-        {/* item?.payment_status == "COMPLETE" &&  <Button /* complete button 
-          / item?.ride_status?.slug == "completed" && (
-          //     backgroundColor={appColors.primary}
-          //     color={appColors.white}
-          //     title={translateData.reviewCustomer}
-          //     onPress={gotoPickup}
-          //   />
-          // )*/}
       </View>
       <Modal
         visible={otpModalVisible}
@@ -433,7 +419,7 @@ export function PendingDetails() {
           >
             <TouchableOpacity
               style={[styles.closeBtn, { flexDirection: viewRtlStyle }]}
-              onPress={closeModal}
+              onPress={() => gotoPickup()}
             >
               <Icons.Close />
             </TouchableOpacity>
@@ -474,11 +460,14 @@ export function PendingDetails() {
               tintColor="transparent"
               offTintColor="transparent"
             />
-            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+            <TouchableOpacity
+              onPress={() => gotoPickup()}
+              style={styles.closeButton}
+            >
               <Button
                 title={translateData.verify}
                 color={appColors.white}
-                onPress={closeModal}
+                // onPress={closeModal}
                 backgroundColor={appColors.primary}
                 margin="0"
               />

@@ -48,6 +48,7 @@ export function LoginView({
     }
   };
   const handleGetOTP = () => {
+    console.log("phoneNumber", phoneNumber);
     if (!phoneNumber) {
       setError(translateData.enterYourPhone);
       return;
