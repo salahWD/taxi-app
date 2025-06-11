@@ -25,10 +25,17 @@ import styles from "./styles";
 
 type navigation = NativeStackNavigationProp<RootStackParamList>;
 
+interface RouteParams {
+  item: any;
+  vehicleDetail: any;
+  status: string;
+}
+
 export function PendingDetails() {
   const route = useRoute();
   const [loading, setLoading] = useState(false);
-  const { item, vehicleDetail, status } = route.params;
+  const { vehicleDetail, status } = (route.params as RouteParams) || {};
+  const [item, setItem] = useState((route.params as RouteParams)?.item);
   const [otpModalVisible, setOtpModalVisible] = useState(false);
   const [warning, setWarning] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
@@ -57,37 +64,6 @@ export function PendingDetails() {
     return now;
   };
 
-  // const endTrip = () => {
-  //   let payload = {
-  //     data: { status: "completed" },
-  //     ride_id: item?.id,
-  //   };
-
-  //   console.log(payload);
-  //   dispatch(rideEndPatch(payload))
-  //     .unwrap()
-  //     .then((res: any) => {
-  //       console.log("ride end patch logging", res);
-
-  //       if (res?.message && !res?.success) {
-  //         Alert.alert("Error", res.message);
-  //       } else {
-  //         navigation.navigate("PendingDetails", {
-  //           item: res,
-  //           vehicleDetail: vehicleDetail,
-  //         });
-  //         console.log("trip ended successfully");
-  //       }
-
-  //       setLoading(false);
-  //       setOtpModalVisible(false);
-  //     })
-  //     .catch(() => {
-  //       setLoading(false);
-  //       setOtpModalVisible(false);
-  //     });
-  // };
-
   const gotoPickup = () => {
     if (loading) return;
     setLoading(true);
@@ -106,11 +82,7 @@ export function PendingDetails() {
           if (res?.message && !res?.success) {
             Alert.alert("Error", res.message);
           } else {
-            console.log(item);
-            navigation.navigate("PendingDetails", {
-              item: res,
-              vehicleDetail: vehicleDetail,
-            });
+            setItem(res);
             console.log("trip started successfully");
           }
           setLoading(false);
@@ -151,11 +123,7 @@ export function PendingDetails() {
         if (res?.message && !res?.success) {
           Alert.alert("Error", res.message);
         } else {
-          console.log(item);
-          navigation.navigate("PendingDetails", {
-            item: res,
-            vehicleDetail: vehicleDetail,
-          });
+          setItem(res);
           console.log("trip started successfully");
         }
         setLoading(false);
